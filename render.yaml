@@ -1,0 +1,76 @@
+services:
+  # API Service
+  - type: web
+    name: kin-api
+    runtime: node
+    plan: free
+    buildCommand: npm install && cd packages/db && npx prisma generate && cd ../../apps/api && npx tsc
+    startCommand: node apps/api/dist/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: kin-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: kin-redis
+          type: redis
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: TELEGRAM_BOT_TOKEN
+        value: "8441840693:AAHfRwUaEnxXrvdA56wKkNQdpMjfVwCZ7Kc"
+      - key: TELEGRAM_BOT_USERNAME
+        value: "kin_builder_bot"
+      - key: WEB_URL
+        value: "https://kin-web.onrender.com"
+
+  # Web Frontend
+  - type: web
+    name: kin-web
+    runtime: static
+    plan: free
+    buildCommand: npm install && cd apps/web && npm install && npx next build
+    staticPublishPath: ./apps/web/dist
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_URL
+        value: "https://kin-api.onrender.com"
+
+  # Worker
+  - type: worker
+    name: kin-worker
+    runtime: node
+    plan: free
+    buildCommand: npm install && cd packages/db && npx prisma generate && cd ../../workers && npx tsc
+    startCommand: node workers/dist/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: kin-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: kin-redis
+          type: redis
+          property: connectionString
+      - key: TELEGRAM_BOT_TOKEN
+        value: "8441840693:AAHfRwUaEnxXrvdA56wKkNQdpMjfVwCZ7Kc"
+      - key: TELEGRAM_BOT_USERNAME
+        value: "kin_builder_bot"
+
+databases:
+  - name: kin-postgres
+    plan: free
+
+redis:
+  - name: kin-redis
+    plan: free
+    maxmemoryPolicy: allkeys-lru
