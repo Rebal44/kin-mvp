@@ -1,0 +1,71 @@
+services:
+  kin-api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    ports:
+      - 3001
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: DATABASE_URL
+        fromDatabase:
+          name: kin-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: kin-redis
+          type: redis
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: TELEGRAM_BOT_TOKEN
+        value: "8441840693:AAHfRwUaEnxXrvdA56wKkNQdpMjfVwCZ7Kc"
+      - key: TELEGRAM_BOT_USERNAME
+        value: "kin_builder_bot"
+      - key: WEB_URL
+        value: "${{RAILWAY_PUBLIC_DOMAIN}}"
+
+  kin-web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - 3000
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_URL
+        value: "https://${{RAILWAY_PUBLIC_DOMAIN}}/api"
+
+  kin-worker:
+    build:
+      context: .
+      dockerfile: workers/Dockerfile
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: kin-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: kin-redis
+          type: redis
+          property: connectionString
+      - key: TELEGRAM_BOT_TOKEN
+        value: "8441840693:AAHfRwUaEnxXrvdA56wKkNQdpMjfVwCZ7Kc"
+      - key: TELEGRAM_BOT_USERNAME
+        value: "kin_builder_bot"
+
+databases:
+  - name: kin-db
+    databaseName: kin
+    user: kin
+
+redis:
+  - name: kin-redis
+    ipAllowList: []

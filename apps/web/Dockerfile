@@ -1,0 +1,20 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY apps/web/package*.json ./apps/web/
+
+# Install dependencies
+RUN npm install
+
+# Copy source
+COPY apps/web ./apps/web
+
+# Build
+RUN cd apps/web && npm run build
+
+EXPOSE 3000
+
+CMD ["npx", "serve", "apps/web/dist", "-l", "3000"]
