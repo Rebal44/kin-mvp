@@ -2,19 +2,18 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
-COPY apps/web/package*.json ./apps/web/
+# Copy everything
+COPY . .
 
 # Install dependencies
 RUN npm install
 
-# Copy source
-COPY apps/web ./apps/web
-
-# Build
-RUN cd apps/web && npm run build
+# Build the web app
+RUN cd apps/web && npx next build
 
 EXPOSE 3000
 
-CMD ["npx", "serve", "apps/web/dist", "-l", "3000"]
+# Use a simple static server for the built files
+RUN npm install -g serve
+
+CMD ["serve", "apps/web/dist", "-l", "3000"]
