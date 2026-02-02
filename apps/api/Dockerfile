@@ -2,18 +2,22 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy everything
-COPY . .
+# Copy package files
+COPY package*.json ./
+COPY packages/db/package*.json ./packages/db/
+COPY apps/api/package*.json ./apps/api/
 
-# Install dependencies at root level (handles workspaces)
-RUN npm install
+# Install dependencies
+RUN npm install --production
+
+# Copy source (including pre-compiled dist)
+COPY packages/db ./packages/db
+COPY apps/api ./apps/api
 
 # Generate Prisma client
 RUN cd packages/db && npx prisma generate
 
-# Build the API
-RUN cd apps/api && npx tsc
-
 EXPOSE 3001
 
+# Run pre-compiled JavaScript
 CMD ["node", "apps/api/dist/index.js"]
