@@ -1,0 +1,25 @@
+{
+  "name": "kin-platform",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "api",
+    "web",
+    "bot",
+    "shared"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\" \"npm run dev:bot\"",
+    "dev:api": "cd api && npm run dev",
+    "dev:web": "cd web && npm run dev",
+    "dev:bot": "cd bot && npm run dev",
+    "build": "npm run build:shared && npm run build:api && npm run build:web && npm run build:bot",
+    "build:api": "cd api && npm run build",
+    "build:web": "cd web && npm run build",
+    "build:bot": "cd bot && npm run build",
+    "build:shared": "cd shared && npm run build"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
